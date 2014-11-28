@@ -53,12 +53,14 @@ grunt.initConfig({
 
 #### options.uploader
 Type: `String`
+
 Default value: `null`
 
 指定要选用的上传工具，当前只支持七牛，即此处只能填 'qiniu'
 
 #### options[options.uploader]
 Type: `Object`
+
 Default value: `null`
 
 将你的 `uploader` 是 `'qiniu'` 或其它上传工具时，你可以为此上传工具指定选项，只要在 options 上配置 `options.qiniu` 即可
@@ -66,12 +68,14 @@ Default value: `null`
 
 #### options.uploadCSS / options.uploadJS / options.uploadHTML
 Type: `boolean`
+
 Default value: `true`
 
 是否将 CSS / JS / HTML 文件上传到CDN服务器上
 
 #### options.dry
 Type: `boolean`
+
 Default value: `false`
 
 只是显示操作结果，不实际上传文件或删除文件
