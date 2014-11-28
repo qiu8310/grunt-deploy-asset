@@ -1,0 +1,40 @@
+{
+  "name": "grunt-deploy-asset",
+  "version": "0.0.1",
+  "description": "部署静态文件到远程CDN服务器（当前只支持\"七牛\")",
+  "homepage": "https://github.com/qiu8310/grunt-deploy-asset",
+  "repository": "https://github.com/qiu8310/grunt-deploy-asset",
+  "author": {
+    "name": "Zhonglei Qiu",
+    "email": "qiuzhongleiabc@126.com",
+    "url": ""
+  },
+  "keywords": [
+    "gruntplugin",
+    "deploy",
+    "asset",
+    "static file",
+    "CDN"
+  ],
+  "main": "Gruntfile.js",
+  "engines": {
+    "node": ">= 0.8.0"
+  },
+  "license": "MIT",
+  "devDependencies": {
+    "grunt-contrib-clean": "~0.5.0",
+    "grunt-contrib-jshint": "~0.8.0",
+    "grunt-contrib-nodeunit": "~0.3.0",
+    "grunt": "~0.4.2",
+    "jshint-stylish": "~0.1.5",
+    "load-grunt-tasks": "~0.3.0"
+  },
+  "scripts": {
+    "test": "grunt test"
+  },
+  "dependencies": {
+    "q": "^1.1.2",
+    "crypto": "0.0.3",
+    "qiniu": "^6.1.6"
+  }
+}
