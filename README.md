@@ -43,6 +43,7 @@ grunt.initConfig({
     },
     yourTarget: {
       // Target-specific file lists and/or options go here.
+      // Target 中只要指定你要处理的 HTML、CSS 文件即可，其它静态文件都可以通过这两类文件索引到，索引不到的不会上传，有索引，但文件不存在的会出 warning 提醒
     }
   }
 })
