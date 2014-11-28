@@ -1,6 +1,7 @@
 # grunt-deploy-asset
 
 > 部署静态文件到远程CDN服务器（当前只支持"七牛")
+
 > [做此项目时总结的相关正则表达示的知识](regexp-help.md)
 
 ## Getting Started
