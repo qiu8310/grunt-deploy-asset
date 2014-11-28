@@ -85,7 +85,7 @@
 * `\w` => `[a-zA-Z_0-9]`，不包括中划线 `-`
 * `\s` => `[ \t\r\n\f\v...]`
 * `\b` => 匹配单词的边界，即`[a-zA-Z_0-9]`之外的字符的边界，它不匹配字符，所以没有宽度
-* **`/(["'])([^\1]*)]\1/.exec('"a\\"a"')` 为什么能匹配成功(`[]`中的`\1`只代表普通的`1`而已)？ => 用 `/(["'])([^\\\n]*?[^\\])(\1)/` 或 `/(["'])(?:(\\.|[^\\\n])*)(\1)/`** 
+* **`/(["'])([^\1]*)\1/.exec('"a\\"a"')` 为什么不能匹配成功([`[]`中的`\1`只代表普通的`1`而已](http://www.regexper.com/#(%5B%22'%5D)(%5B%5E%5C1%5D*)%5C1))？ => 用 `/(["'])([^\\\n]*?[^\\])(\1)/` 或 `/(["'])(?:(\\.|[^\\\n])*)(\1)/`** 
 * **实现`String.lastSearch`，返回匹配的字符串最后一次出现的位置**
 * **实现`String.reverseSearch`,反向查找匹配的字符串第一次出现的位置**
 * `?`放在 `()` 后面很容易出现 `undefined`，解决方法 `((?:exp)?)`
@@ -137,12 +137,14 @@ $'                | 匹配字符串右边的字符
 * [前端乱炖: JS下的正则表达式（JS正则的回溯机制耗费性能分析 => 降低正则复杂度，尽量用JS去分析匹配后的字符串）][2]
 * [小胡子哥：正则表达式30分钟入门][3]
 * [小胡子哥：正则表达示进阶][4]
+* [Regexper: 在线的正则表达示分析工具][5]
 
 [1]: http://www.cnblogs.com/rubylouvre/archive/2010/03/09/1681222.html
 [2]: http://www.html-js.com/article/1275
 [3]: http://www.cnblogs.com/hustskyking/archive/2013/06/04/RegExp.html
 [4]: http://www.cnblogs.com/hustskyking/p/how-regular-expressions-work.html
 [mdn]: https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/RegExp 
+[5]: http://www.regexper.com
 
 
 
