@@ -27,26 +27,13 @@ function getFileType(file) {
 }
 
 // 获取 tag 上的静态资源
-Tag.prototype.asset = function() {
-  return this.getData();
-};
-
-// 生成  Ctrl 中的 tag
-function pushTag(tags, dir, src, sentence, index, sience) {
-  src = src.trim().split(/\?|#/).shift(); // 去掉资源后面的参数
-
-  // 忽略远程地址
-  if (src.indexOf('http://') !== 0 && src.indexOf('//') !== 0) {
-    var asset = path.resolve(dir, src);
-    if (fs.existsSync(asset)) {
-      tags.push(new Tag(sentence, src, index, asset));
-    } else {
-      if (!sience) {
-        grunt.fail.warn('Asset not exist ' + asset);
-      }
-    }
+Tag.prototype.asset = function(src) {
+  if (typeof src === 'undefined') {
+    return this.getData().asset;
+  } else {
+    this.data.asset = src;
   }
-}
+};
 
 
 // 循环删除空的父文件夹
@@ -64,15 +51,16 @@ function Adapter(type, options, files, uploader, _grunt) {
   var self = this, finder;
   grunt = _grunt; // 保留 grunt
 
+  this.type = type;
+  this.originalFiles = files; // 在删除文件时，如果存在这里面，要把这里的文件也删除了
   this.uploader = uploader;
-  this.dry = options.dry;
-  this.deleteUploaded = options.deleteUploaded;
+  this.gruntOptions = options;
 
   this.assetsMap = {};   // localAsset => remoteAsset
   this.fileCtrlMap = {}; // textFile => Ctrl
 
   this.finder = finder = require('./asset-finders/' + type + '-finder.js');
-  options = this.option(options);
+  options = this.option(options); // 这个 options 是 finder 里设置的，可以在 grunt 里配置，传递给 finder
 
   files.forEach(function(file) {
     var fileType = getFileType(file),
@@ -80,13 +68,30 @@ function Adapter(type, options, files, uploader, _grunt) {
 
     fn = finder[fileType];
     if (typeof fn === 'function') {
+
       content = grunt.file.read(file);
       dir = path.dirname(file);
 
       tags = [];
       fn(function(sentence, src, index, sience) {
-        pushTag(tags, dir, src, sentence, index, sience);
+        return self._pushTag(tags, dir, src, sentence, index, {sience: sience});
       }, content, file, options);
+
+
+
+      // 检查 tag 中的 asset 是否都存在
+      tags = tags.filter(function(tag) {
+        var asset = tag.asset();
+        if (!asset) { // 如果没设置 asset，直接忽略
+          return false;
+        }
+        if (!fs.existsSync(asset)) {  // 静态资源不存在，发出警告
+          grunt.fail.warn('Asset not exist ' + asset);
+          return false;
+        }
+        return true;
+      });
+
 
       // 保存 Ctrl
       var ctrl = new Ctrl(content, tags);
@@ -128,11 +133,28 @@ Adapter.prototype = {
       this.assetsMap[asset] = false;
     }
   },
-  // grunt-deploy-asset
+
+  _pushTag: function(tags, dir, src, sentence, index, opts) {
+    src = src.trim().split(/\?|#/).shift(); // 去掉资源后面的参数
+
+    // 忽略远程地址
+    if (src && src.indexOf('http://') !== 0 && src.indexOf('//') !== 0) {
+      opts.asset = path.resolve(dir, src);
+      if (opts.sience && !fs.existsSync(opts.asset)) {
+        return false;
+      }
+      var tag = new Tag(sentence, src, index, opts);
+      tags.push(tag);
+      return tag;
+    }
+
+    return false;
+  },
+
   _updateToLocal: function() {
     var assetsMap = this.assetsMap,
       fileCtrlMap = this.fileCtrlMap,
-      dry = this.dry;
+      dry = this.gruntOptions.dry;
 
     // 上传完成，将新的 url 更新到文件中
     Object.keys(fileCtrlMap).forEach(function(file) {
@@ -153,13 +175,19 @@ Adapter.prototype = {
 
   _deleteUploaded: function() {
     var assetsMap = this.assetsMap,
-      dry = this.dry;
+      dry = this.gruntOptions.dry,
+      originalFiles = this.originalFiles;
 
     Object.keys(assetsMap).forEach(function(local) {
       if (assetsMap[local]) {
         if (!dry) {
           grunt.file.delete(local);
           deleteEmptyParentFolders(local);
+        }
+
+        var existIndex = originalFiles.indexOf(local);
+        if (existIndex >= 0) {
+          originalFiles.splice(existIndex, 1);
         }
         grunt.log.ok('Delete ' + local + ' ok');
       }
@@ -187,20 +215,19 @@ Adapter.prototype = {
           finishLen += 1;
           if (finishLen === assetLen) {
             self._updateToLocal();
-            if (self.deleteUploaded) {
+            if (self.gruntOptions.deleteUploaded) {
               self._deleteUploaded();
             }
             deferred.resolve(assetsMap);
           }
         };
       };
-
     if (assetLen === 0) {
       deferred.resolve(assetsMap);
     } else {
       // 一个个文件上传
       assets.forEach(function(asset) {
-        uploader.upload(asset, uploadedFn(asset), self.dry);
+        uploader.upload(asset, uploadedFn(asset), self.gruntOptions.dry);
       });
     }
 

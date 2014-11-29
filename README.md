@@ -80,6 +80,21 @@ Default value: `false`
 
 只是显示操作结果，不实际上传文件或删除文件
 
+#### options.angularTplTransform __ v0.0.2新添加的 __
+Type: `function`
+
+Default value:
+```js
+  angularTplTransform: function(tplPath, tplCalledBy) {
+    return tplPath.replace(/\/scripts?\//, '/');
+  }
+```
+
+由于 angular 的模板文件定义在 js 中，而模板又不是相对于 js 定位的，所以需要手动处理下经的路径，
+默认处理方式只是把路径中的 scripts 或 script 去掉而已。
+
+如果这个函数返回 false，则表示忽略这个文件，此文件就不会传到 CDN 上了
+
 
 ### Usage Examples
 
@@ -119,4 +134,9 @@ grunt.initConfig({
 
 Test
 
+
+## Release History
+
+* 2014-11-30  0.0.2  支持 angular 中的 templateUrl 处理
+* 2014-11-29  0.0.1  首次发布
 

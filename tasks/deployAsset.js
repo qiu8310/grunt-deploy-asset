@@ -14,8 +14,7 @@ module.exports = function (grunt) {
   // creation: http://gruntjs.com/creating-tasks
 
   var Adapter = require('./lib/adapter'),
-    path = require('path'),
-    Q = require('q');
+    path = require('path');
 
   grunt.registerMultiTask('deployAsset', '部署静态文件到远程CDN服务器（当前只支持"七牛")', function () {
 
@@ -27,6 +26,9 @@ module.exports = function (grunt) {
         uploadJS: true,
         uploadHTML: true,
         deleteUploaded: true,
+        angularTplTransform: function(tplPath, tplCalledBy) {
+          return tplPath.replace(/\/scripts?\//, '/');
+        },
         dry: false // 只显示结果，不实际操作
       });
 
@@ -49,62 +51,47 @@ module.exports = function (grunt) {
       });
     });
 
-
     try {
 
-      var staticAdapter = new Adapter('static', options, files, uploader, grunt);
-      staticAdapter
-        .upload()
+      grunt.log.writeln('\r\nUpload static files in HTML/CSS:');
+      (new Adapter('static', options, files, uploader, grunt)).upload()
         .then(function () {
-
-          grunt.log.ok('Upload static files in HTML/CSS ok\n');
-
-        }).then(function () {
-
-          return Q.fcall(function () {
-            if (options.uploadCSS) {
-              return (new Adapter('css', options, files, uploader, grunt))
-                .upload()
-                .then(function () {
-                  grunt.log.ok('Upload css files in HTML ok\n');
-                });
-            }
-          });
-
-        }).then(function () {
-
-          return Q.fcall(function () {
-            if (options.uploadJS) {
-              return (new Adapter('js', options, files, uploader, grunt))
-                .upload()
-                .then(function () {
-                  grunt.log.ok('Upload js files in HTML ok\n');
-                });
-            }
-          });
-
-        }).then(function () {
-
+          if (options.uploadCSS) {
+            grunt.log.writeln('\r\nUpload css files in HTML:');
+            return (new Adapter('css', options, files, uploader, grunt)).upload();
+          }
+        })
+        // 处理 angular 需要在处理 JS 前面
+        .then(function () {
+          grunt.log.writeln('\r\nUpload angular templates:');
+          return (new Adapter('angular-tpl', options, files, uploader, grunt)).upload();
+        })
+        .then(function () {
+          if (options.uploadJS) {
+            grunt.log.writeln('\r\nUpload js files in HTML:');
+            return (new Adapter('js', options, files, uploader, grunt)).upload();
+          }
+        })
+        .then(function () {
           // 上传 html 文件到服务器
-          return Q.fcall(function () {
-            if (options.uploadHTML) {
-              var adapter = new Adapter('no', options, files, uploader, grunt);
+          if (options.uploadHTML) {
+            var adapter = new Adapter('no', options, files, uploader, grunt);
 
-              files.forEach(function (f) {
-                if (['html', 'htm'].indexOf(f.split('.').pop()) >= 0) {
-                  adapter.addAsset(f);
-                }
+            files.forEach(function (f) {
+              if (['html', 'htm'].indexOf(f.split('.').pop()) >= 0) {
+                adapter.addAsset(f);
+              }
+            });
+
+            grunt.log.writeln('\r\nUpload html files: ');
+            return adapter.upload().then(function (assetMap) {
+              grunt.log.writeln('Result: ');
+              Object.keys(assetMap).forEach(function (local) {
+                grunt.log.ok(local.replace(process.cwd(), '').substr(1) + ' => ' + assetMap[local]);
               });
+            });
+          }
 
-              return adapter.upload().then(function (assetMap) {
-                grunt.log.writeln('\r\nUpload html files: ');
-
-                Object.keys(assetMap).forEach(function (local) {
-                  grunt.log.ok(local.replace(process.cwd(), '').substr(1) + ' => ' + assetMap[local]);
-                });
-              });
-            }
-          });
 
         }).then(done);
 
