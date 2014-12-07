@@ -166,8 +166,8 @@ grunt.initConfig({
 
 ### TODO
 
-Test
-
+* 如果deploy时，因为某些静态文件不存在而导致编译失败，当你只是加上 --force 去 deploy是不行的，还得重新编译下你的文件，因为你本地的一些编译后的文件可能已经更新了
+* 处理 ng-include 包含的模板
 
 ## Release History
 
