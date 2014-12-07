@@ -47,6 +47,17 @@ function deleteEmptyParentFolders(file) {
 }
 
 
+// 记录本次部署成功的所有本地文件和远程文件之间的对应关系
+var allAssetMap = {},
+  assignToAllAssetMap = function(assetMap) {
+    Object.keys(assetMap || {}).forEach(function(key) {
+      if (assetMap[key]) { // 保存远程文件是存在的
+        allAssetMap[key] = assetMap[key];
+      }
+    });
+  };
+
+
 function Adapter(type, options, files, uploader, _grunt) {
   var self = this, finder;
   grunt = _grunt; // 保留 grunt
@@ -85,7 +96,7 @@ function Adapter(type, options, files, uploader, _grunt) {
         if (!asset) { // 如果没设置 asset，直接忽略
           return false;
         }
-        if (!fs.existsSync(asset)) {  // 静态资源不存在，发出警告
+        if (!fs.existsSync(asset) && !self.gruntOptions.ignoreAssetNotExist) {  // 静态资源不存在，发出警告
           grunt.fail.warn('Asset not exist ' + asset);
           return false;
         }
@@ -129,7 +140,16 @@ Adapter.prototype = {
   },
 
   addAsset: function(asset) {
-    if ((typeof asset === 'string') && !(asset in this.assetsMap)) {
+    if (
+      (typeof asset === 'string') &&
+      !(asset in this.assetsMap) &&
+
+        // 判断文件是否在之前的上传中已经上传过，上传过则不再上传了
+      !(asset in allAssetMap) &&
+
+        // 文件不应该在忽略上传的列表中
+      ! grunt.file.isMatch(this.gruntOptions.ignoreUploadAssets, asset.replace(process.cwd() + path.sep, ''))
+    ) {
       this.assetsMap[asset] = false;
     }
   },
@@ -140,9 +160,12 @@ Adapter.prototype = {
     // 忽略远程地址
     if (src && src.indexOf('http://') !== 0 && src.indexOf('//') !== 0) {
       opts.asset = path.resolve(dir, src);
-      if (opts.sience && !fs.existsSync(opts.asset)) {
+
+      // 忽略地址中包含 < > 或 { } 这种可能是静态变量的文件
+      if (!fs.existsSync(opts.asset) && (opts.sience || /\{.+\}|<.+>/.test(opts.asset))) {
         return false;
       }
+
       var tag = new Tag(sentence, src, index, opts);
       tags.push(tag);
       return tag;
@@ -218,6 +241,7 @@ Adapter.prototype = {
             if (self.gruntOptions.deleteUploaded) {
               self._deleteUploaded();
             }
+            assignToAllAssetMap(assetsMap);
             deferred.resolve(assetsMap);
           }
         };
@@ -236,5 +260,9 @@ Adapter.prototype = {
   }
 };
 
+
+Adapter.getAllAssetMap = function() {
+  return allAssetMap;
+};
 
 module.exports = Adapter;

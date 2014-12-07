@@ -26,12 +26,14 @@ module.exports = function (grunt) {
         uploadJS: true,
         uploadHTML: true,
         deleteUploaded: true,
-        angularTplTransform: function(tplPath, tplCalledBy) {
+        ignoreAssetNotExist: false,
+        ignoreUploadAssets: [], // 指定的文件不上传到CDN上
+        assetMapJsonFile: null,
+        angularTplTransform: function(tplPath, tplCalledBy) { // angular 模板文件写在JS中，而模板文件的路径去不是相对于JS的
           return tplPath.replace(/\/scripts?\//, '/');
         },
         dry: false // 只显示结果，不实际操作
       });
-
 
     if (!options.uploader || !options[options.uploader]) {
       grunt.fail.fatal('没有配置部署到的目标');
@@ -52,7 +54,6 @@ module.exports = function (grunt) {
     });
 
     try {
-
       grunt.log.writeln('\r\nUpload static files in HTML/CSS:');
       (new Adapter('static', options, files, uploader, grunt)).upload()
         .then(function () {
@@ -92,9 +93,12 @@ module.exports = function (grunt) {
             });
           }
 
-
-        }).then(done);
-
+        }).then(function() {
+          if (options.assetMapJsonFile) {
+            grunt.file.write(options.assetMapJsonFile, JSON.stringify(Adapter.getAllAssetMap(), null, '\t'));
+          }
+          done();
+        });
 
     } catch (e) {
       grunt.fail.warn(e);

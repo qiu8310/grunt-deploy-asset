@@ -39,6 +39,9 @@ grunt.initConfig({
       uploadJS: true,
       uploadHTML: true,
       deleteUploaded: true,
+      ignoreAssetNotExist: false,  // 0.0.3 新添加参数，是否忽略资源不存在时的警告信息
+      ignoreUploadAssets: [],  // 0.0.3 新添加参数，指定不要上传的文件
+      assetMapJsonFile: null, // 0.0.3 新添加参数，生成文件映射关系存放在本地
       dry: false // 只显示操作结果，不实际上传文件或删除文件
     },
     yourTarget: {
@@ -80,7 +83,7 @@ Default value: `false`
 
 只是显示操作结果，不实际上传文件或删除文件
 
-#### options.angularTplTransform __ v0.0.2新添加的 __
+#### options.angularTplTransform __ 0.0.2新添加的 __
 Type: `function`
 
 Default value:
@@ -94,6 +97,33 @@ Default value:
 默认处理方式只是把路径中的 scripts 或 script 去掉而已。
 
 如果这个函数返回 false，则表示忽略这个文件，此文件就不会传到 CDN 上了
+
+#### options.ignoreAssetNotExist  __ 0.0.3新添加的 __
+Type: `boolean`
+
+Default value: `false`
+
+是否忽略所有静态文件不存在的错误提醒，默认为`false`，可以用 `grunt deployAsset --force` 强制忽略。
+
+建议设置为`false`，这样你就可以知道你的项目中是否使用了一些不存在的静态文件
+
+__ 注意：如果deploy时，因为某些静态文件不存在而导致编译失败，当你只是加上 --force 去 deploy是不行的，还得重新编译下你的文件，因为你本地的一些编译后的文件可能已经更新了(WILL FIXED) __
+
+
+#### options.ignoreUploadAssets __ 0.0.3新添加的 __
+Type: `string` or `array`
+
+Default value: `[]`
+
+指定的文件不会上传到CDN上，配置方法可以像配置 `grunt` 文件一样，使用的是[`grunt.file.match`方法](http://gruntjs.com/api/grunt.file#grunt.file.match)
+
+
+#### options.assetMapJsonFile __ 0.0.3新添加的 __
+Type: `string`
+
+Default value `null`
+
+指定一个JSON文件路径，用来生成一个本地文件到远程文件的关系映射的JSON文件，默认不生成任何文件
 
 
 ### Usage Examples
@@ -109,6 +139,10 @@ grunt.initConfig({
       uploadJS: true,
       uploadHTML: true,
       deleteUploaded: true,
+      angularTplTransform: function(tplPath, tplCalledBy) { return tplPath.replace(/\/scripts?\//, '/'); },
+      ignoreAssetNotExist: false,
+      ignoreUploadAssets: [],
+      assetMapJsonFile: null,
       dry: false
     }
   },
@@ -137,6 +171,12 @@ Test
 
 ## Release History
 
-* 2014-11-30  0.0.2  支持 angular 中的 templateUrl 处理
-* 2014-11-29  0.0.1  首次发布
+* 2014-12-08   0.0.3    
+    1. 添加配置`ignoreAssetNotExist`
+    2. 添加配置`ignoreUploadAssets`
+    3. 添加配置`assetMapJsonFile`
+    4. 如果静态资源路径中包含 `<...>` 或 `{...}`，并且资源不存在，则忽略此资源，因为这可能是一些动态模板文件的变量
+    
+* 2014-11-30   0.0.2    支持 angular 中的 templateUrl 处理.
+* 2014-11-29   0.0.1    首次发布.
 
