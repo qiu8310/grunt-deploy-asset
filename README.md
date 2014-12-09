@@ -39,9 +39,11 @@ grunt.initConfig({
       uploadJS: true,
       uploadHTML: true,
       deleteUploaded: true,
-      ignoreAssetNotExist: false,  // 0.0.3 新添加参数，是否忽略资源不存在时的警告信息
-      ignoreUploadAssets: [],  // 0.0.3 新添加参数，指定不要上传的文件
-      assetMapJsonFile: null, // 0.0.3 新添加参数，生成文件映射关系存放在本地
+      ignoreAssetNotExist: false,  // 0.0.3添加参数，是否忽略资源不存在时的警告信息
+      ignoreUploadAssets: [],  // 0.0.3添加参数，指定不要上传的文件
+      assetMapJsonFile: null, // 0.0.3添加参数，生成文件映射关系存放在本地
+      mapUpload: false, // 0.0.4添加， 指定上传文件的名称， src => dest 的形式部署，部署后文件的名称为 dest
+      overwrite: false, // 0.0.4添加， 有同名文件是否覆盖
       dry: false // 只显示操作结果，不实际上传文件或删除文件
     },
     yourTarget: {
@@ -125,6 +127,20 @@ Default value `null`
 
 指定一个JSON文件路径，用来生成一个本地文件到远程文件的关系映射的JSON文件，默认不生成任何文件
 
+#### options.mapUpload __ 0.0.4新添加的 __
+Type: `boolean`
+
+Default value `false`
+
+如果为 `true`，则会保存 `grunt` 中配置的 dest 文件名称，上传时会把它设置成上传后的文件名称
+
+
+#### options.overwrite __ 0.0.4新添加的 __
+Type: `boolean`
+
+Default value `false`
+
+是否覆盖重名文件，如果为 `false` 并且出现了重名文件，会报错
 
 ### Usage Examples
 
@@ -171,6 +187,10 @@ grunt.initConfig({
 
 ## Release History
 
+* 2014-12-09   0.0.4
+    1. 添加配置 `mapUpload`
+    2. 添加配置 `overwrite`
+    
 * 2014-12-08   0.0.3    
     1. 添加配置`ignoreAssetNotExist`
     2. 添加配置`ignoreUploadAssets`

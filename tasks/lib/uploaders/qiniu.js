@@ -31,25 +31,36 @@ exports.init = function(_grunt, options) {
 
 
 
-exports.upload = function(file, cb, dry) {
+exports.upload = function(file, cb, opts) {
+
+  opts = opts || {};
 
   var extname = path.extname(file),
     content = grunt.file.read(file),
-    key;
+    key, token;
 
-  if (typeof prefix === 'function') {
-    key = prefix(file);
+  // 获取要上传文件的名字
+  if (opts.remoteName) {
+    key = opts.remoteName;
+  } else {
+    if (typeof prefix === 'function') {
+      key = prefix(file);
+    }
+    key = key || (typeof prefix === 'string' ? prefix : '') + md5(content) + extname;
   }
-  key = key || (typeof prefix === 'string' ? prefix : '') + md5(content) + extname;
 
-  if (dry) {
+  if (opts.dry) {
 
     cb(false, remoteBaseURL + key);
 
   } else {
 
-    var token = new qiniu.rs.PutPolicy(bucket).token();
+    token = new qiniu.rs.PutPolicy(bucket + (opts.overwrite ? ':' + key : '')).token();
     qiniu.io.putFile(token, key, file, null, function(err, ret) {
+      if (err) {
+        err.localFile = file;
+        err.remoteFile = key;
+      }
       cb(err, remoteBaseURL + ret.key );
     });
 

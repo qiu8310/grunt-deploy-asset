@@ -139,8 +139,14 @@ Adapter.prototype = {
     return options;
   },
 
-  addAsset: function(asset) {
-    if (
+  addAsset: function(asset, remoteName) {
+    if (typeof asset === 'object') {
+      var self = this;
+      Object.keys(asset).forEach(function(src) {
+        self.addAsset(src, asset[src] || false);
+      });
+
+    } else if (
       (typeof asset === 'string') &&
       !(asset in this.assetsMap) &&
 
@@ -150,8 +156,9 @@ Adapter.prototype = {
         // 文件不应该在忽略上传的列表中
       ! grunt.file.isMatch(this.gruntOptions.ignoreUploadAssets, asset.replace(process.cwd() + path.sep, ''))
     ) {
-      this.assetsMap[asset] = false;
+      this.assetsMap[asset] = remoteName || false;
     }
+    return this;
   },
 
   _pushTag: function(tags, dir, src, sentence, index, opts) {
@@ -221,7 +228,6 @@ Adapter.prototype = {
     var assetsMap = this.assetsMap,
       self = this,
       deferred = Q.defer();
-
     uploader = uploader || this.uploader;
 
     // 将 assetsMap 中的 keys 上传到 target
@@ -251,7 +257,11 @@ Adapter.prototype = {
     } else {
       // 一个个文件上传
       assets.forEach(function(asset) {
-        uploader.upload(asset, uploadedFn(asset), self.gruntOptions.dry);
+        uploader.upload(asset, uploadedFn(asset), {
+          dry: self.gruntOptions.dry,
+          overwrite: self.gruntOptions.overwrite,
+          remoteName: assetsMap[asset]
+        });
       });
     }
 

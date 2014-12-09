@@ -32,6 +32,10 @@ module.exports = function (grunt) {
         angularTplTransform: function(tplPath, tplCalledBy) { // angular 模板文件写在JS中，而模板文件的路径去不是相对于JS的
           return tplPath.replace(/\/scripts?\//, '/');
         },
+
+        mapUpload: false, // 指定上传文件的名称 src => dest 的形式部署，部署后文件的名称为 dest
+        overwrite: false, // 有同名文件是否覆盖
+
         dry: false // 只显示结果，不实际操作
       });
 
@@ -46,14 +50,42 @@ module.exports = function (grunt) {
 
 
     // 获取所有要处理的文件
-    var files = [];
+    var files = [], fileMap = {};
     this.files.forEach(function (f) {
       f.src.forEach(function (filepath) {
-        files.push(path.resolve(filepath));
+        filepath = path.resolve(filepath);
+        files.push(filepath);
+        fileMap[path.basename(f.dest)] = filepath;
       });
     });
 
-    try {
+    var outputUploadResult = function(assetMap, title) {
+      if (title) {
+        grunt.log.writeln(title);
+      }
+      Object.keys(assetMap).forEach(function (local) {
+        grunt.log.ok(local.replace(process.cwd(), '').substr(1) + ' => ' + assetMap[local]);
+      });
+    };
+    var objectReverse = function(obj) {
+      var result = {};
+      Object.keys(obj).forEach(function(key) {
+        result[obj[key]] = key;
+      });
+      return result;
+    };
+    var uploadError = function(err) {
+      console.log(err);
+      grunt.log.error(err.error);
+    };
+
+    // 指定远程文件名形式的上传
+    if (options.mapUpload) {
+      var mapAdapter = new Adapter('no', options, files, uploader, grunt),
+        uploadAsset = objectReverse(fileMap);
+      mapAdapter.addAsset(uploadAsset).upload().then(outputUploadResult, uploadError).then(done);
+
+    } else {
       grunt.log.writeln('\r\nUpload static files in HTML/CSS:');
       (new Adapter('static', options, files, uploader, grunt)).upload()
         .then(function () {
@@ -85,12 +117,7 @@ module.exports = function (grunt) {
             });
 
             grunt.log.writeln('\r\nUpload html files: ');
-            return adapter.upload().then(function (assetMap) {
-              grunt.log.writeln('Result: ');
-              Object.keys(assetMap).forEach(function (local) {
-                grunt.log.ok(local.replace(process.cwd(), '').substr(1) + ' => ' + assetMap[local]);
-              });
-            });
+            return adapter.upload().then(outputUploadResult);
           }
 
         }).then(function() {
@@ -99,9 +126,6 @@ module.exports = function (grunt) {
           }
           done();
         });
-
-    } catch (e) {
-      grunt.fail.warn(e);
     }
 
   });
