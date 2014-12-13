@@ -38,7 +38,7 @@ grunt.initConfig({
       uploadCSS: true,
       uploadJS: true,
       uploadHTML: true,
-      deleteUploaded: true,
+      deleteUploaded: false,
       ignoreAssetNotExist: false,  // 0.0.3添加参数，是否忽略资源不存在时的警告信息
       ignoreUploadAssets: [],  // 0.0.3添加参数，指定不要上传的文件
       assetMapJsonFile: null, // 0.0.3添加参数，生成文件映射关系存放在本地

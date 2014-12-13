@@ -25,7 +25,7 @@ module.exports = function (grunt) {
         uploadCSS: true,
         uploadJS: true,
         uploadHTML: true,
-        deleteUploaded: true,
+        deleteUploaded: false,
         ignoreAssetNotExist: false,
         ignoreUploadAssets: [], // 指定的文件不上传到CDN上
         assetMapJsonFile: null,
