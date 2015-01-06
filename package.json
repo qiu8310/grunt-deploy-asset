@@ -1,6 +1,6 @@
 {
   "name": "grunt-deploy-asset",
-  "version": "0.0.4",
+  "version": "0.0.5",
   "description": "部署静态文件到远程CDN服务器（当前只支持\"七牛\")",
   "homepage": "https://github.com/qiu8310/grunt-deploy-asset",
   "repository": "https://github.com/qiu8310/grunt-deploy-asset",

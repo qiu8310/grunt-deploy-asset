@@ -22,7 +22,7 @@ exports.init = function(_grunt, options) {
   bucket = options.bucket;
   prefix = options.prefix || '';
   grunt = _grunt;
-  remoteBaseURL = 'http://' + bucket + '.qiniudn.com/';
+  remoteBaseURL = 'http://' + (options.baseDomain || bucket + '.qiniudn.com') + '/';
 
 
   qiniu.conf.ACCESS_KEY = ak;

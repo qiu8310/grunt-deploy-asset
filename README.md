@@ -33,6 +33,7 @@ grunt.initConfig({
         accessKey: "...",
         secretKey: "...",
         bucket: "...",
+        baseDomain: "", // 七牛默认的域名解析失败，结果所有文件访问不了，加这个新属性来配置使用指定的七牛的域名
         prefix: "t-"  // 上传到七牛后的文件名的前缀
       }
       uploadCSS: true,
@@ -84,6 +85,14 @@ Type: `boolean`
 Default value: `false`
 
 只是显示操作结果，不实际上传文件或删除文件
+
+#### options.deleteUploaded
+Type: `boolean`
+
+Default value: `false`
+
+是否删除上传成功的本地文件
+
 
 #### options.angularTplTransform __ 0.0.2新添加的 __
 Type: `function`
@@ -186,6 +195,9 @@ grunt.initConfig({
 * 处理 ng-include 包含的模板
 
 ## Release History
+* 2015-01-06   0.0.5
+    1. 七牛的域名可指定
+    2. 配置 deleteUploaded 默认改为 false
 
 * 2014-12-09   0.0.4
     1. 添加配置 `mapUpload`
