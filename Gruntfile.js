@@ -28,32 +28,39 @@ module.exports = function (grunt) {
 
     // Before generating any new files, remove any previously-created files.
     clean: {
-      tests: ['tmp']
+      tests: ['test/tmp']
     },
 
     // Configuration to be run (and then tested).
-    deployAsset: {
-      default_options: {
+    da: {
+      options: {
+        rootDir: 'test/fixtures',
+        dry: true,
+        logLevel: 'silent',
+        rename: function(oldBasename) { return oldBasename.replace(/^\w+/, 'h'); }
+      },
+      defaults: {
         options: {
+          outDir: '../tmp/defaults'
         },
         files: {
-          'tmp/default_options': ['test/fixtures/testing', 'test/fixtures/123']
+          'default-options': ['test/fixtures/b.css']
         }
       },
-      custom_options: {
+      customs: {
         options: {
-          separator: ': ',
-          punctuation: ' !!!'
+          outDir: '../tmp/customs',
+          unbrokenFiles: 'b.css'
         },
         files: {
-          'tmp/custom_options': ['test/fixtures/testing', 'test/fixtures/123']
+          'custom-options': ['test/fixtures/b.css']
         }
       }
     },
 
     // Unit tests.
     nodeunit: {
-      tests: ['test/*_test.js']
+      tests: ['test/*-test.js']
     }
 
   });
@@ -63,7 +70,7 @@ module.exports = function (grunt) {
 
   // Whenever the "test" task is run, first clean the "tmp" dir, then run this
   // plugin's task(s), then test the result.
-  grunt.registerTask('test', ['clean', 'deploy_asset', 'nodeunit']);
+  grunt.registerTask('test', ['clean', 'da', 'nodeunit']);
 
   // By default, lint and run all tests.
   grunt.registerTask('default', ['jshint', 'test']);

@@ -22,25 +22,25 @@ var grunt = require('grunt');
     test.ifError(value)
 */
 
-exports.deploy_asset = {
+exports.da = {
   setUp: function (done) {
     // setup here if necessary
     done();
   },
-  default_options: function (test) {
+  defaultOptions: function (test) {
     test.expect(1);
 
-    var actual = grunt.file.read('tmp/default_options');
-    var expected = grunt.file.read('test/expected/default_options');
+    var actual = grunt.file.read('test/tmp/defaults/h.css');
+    var expected = grunt.file.read('test/expected/defaults/h.css');
     test.equal(actual, expected, 'should describe what the default behavior is.');
 
     test.done();
   },
-  custom_options: function (test) {
+  customOptions: function (test) {
     test.expect(1);
 
-    var actual = grunt.file.read('tmp/custom_options');
-    var expected = grunt.file.read('test/expected/custom_options');
+    var actual = grunt.file.read('test/tmp/customs/h.css');
+    var expected = grunt.file.read('test/expected/customs/h.css');
     test.equal(actual, expected, 'should describe what the custom option(s) behavior is.');
 
     test.done();

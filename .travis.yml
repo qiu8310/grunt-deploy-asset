@@ -1,0 +1,23 @@
+language: node_js
+env: CI=true
+sudo: false
+
+
+node_js:
+  - "iojs"
+  - "0.12"
+  - "0.11"
+  - "0.10"
+  - "iojs-v1.0.0"
+  - "iojs-v1.1.0"
+  - "iojs-v1.2.0"
+  - "iojs-v1.3.0"
+  - "iojs-v1.4.0"
+  - "iojs-v1.5.0"
+  - "iojs-v1.6.0"
+  - "iojs"
+
+notifications:
+  email:
+    - qiuzhongleiabc@126.com
+
